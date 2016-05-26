@@ -215,8 +215,8 @@ module JSONAPI
 
       # TODO: Communicate with upstream to fix this nasty hack
       def operation_context
-        case @operation
-        when JSONAPI::ShowRelatedResourcesOperation
+        case @operation.operation_type
+        when :show_relationship
           @operation.instance_variable_get('@options')[:context]
         else
           @operation.options[:context]
@@ -225,10 +225,10 @@ module JSONAPI
 
       # TODO: Communicate with upstream to fix this nasty hack
       def operation_resource_id
-        case @operation
-        when JSONAPI::ShowOperation
+        case @operation.operation_type
+        when :show
           @operation.id
-        when JSONAPI::ShowRelatedResourcesOperation
+        when :show_relationship
           @operation.source_id
         else
           @operation.resource_id
