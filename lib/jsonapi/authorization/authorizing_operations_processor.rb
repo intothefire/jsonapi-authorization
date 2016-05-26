@@ -60,7 +60,7 @@ module JSONAPI
       def authorize_show
         record = @resource_klass.find_by_key(
           operation_resource_id,
-          context: operation_context
+          context: context
         )._model
 
         authorizer.show(record)
@@ -69,7 +69,7 @@ module JSONAPI
       def authorize_show_relationship
         parent_resource = @resource_klass.find_by_key(
           @operation.parent_key,
-          context: operation_context
+          context: context
         )
 
         relationship = @resource_klass._relationship(@operation.relationship_type)
@@ -92,7 +92,7 @@ module JSONAPI
       def authorize_show_related_resource
         source_resource = @operation.source_klass.find_by_key(
           @source_id,
-          context: operation_context
+          context: context
         )
 
         related_resource = source_resource.public_send(@operation.relationship_type)
@@ -105,7 +105,7 @@ module JSONAPI
       def authorize_show_related_resources
         source_record = @operation.source_klass.find_by_key(
           @source_id,
-          context: operation_context
+          context: context
         )._model
 
         authorizer.show_related_resources(source_record)
@@ -114,7 +114,7 @@ module JSONAPI
       def authorize_replace_fields
         source_record = @resource_klass.find_by_key(
           @resource_id,
-          context: operation_context
+          context: context
         )._model
 
         authorizer.replace_fields(source_record, related_models)
@@ -129,7 +129,7 @@ module JSONAPI
       def authorize_remove_resource
         record = @resource_klass.find_by_key(
           operation_resource_id,
-          context: operation_context
+          context: context
         )._model
 
         authorizer.remove_resource(record)
@@ -138,7 +138,7 @@ module JSONAPI
       def authorize_replace_to_one_relationship
         source_resource = @resource_klass.find_by_key(
           @resource_id,
-          context: operation_context
+          context: context
         )
         source_record = source_resource._model
 
@@ -146,7 +146,7 @@ module JSONAPI
         unless @operation.key_value.nil?
           new_related_resource = @resource_klass._relationship(@operation.relationship_type).resource_klass.find_by_key(
             @operation.key_value,
-            context: operation_context
+            context: context
           )
           new_related_record = new_related_resource._model unless new_related_resource.nil?
         end
@@ -161,7 +161,7 @@ module JSONAPI
       def authorize_create_to_many_relationship
         source_record = @resource_klass.find_by_key(
           @resource_id,
-          context: operation_context
+          context: context
         )._model
 
         related_models =
@@ -173,7 +173,7 @@ module JSONAPI
       def authorize_replace_to_many_relationship
         source_resource = @resource_klass.find_by_key(
           @resource_id,
-          context: operation_context
+          context: context
         )
         source_record = source_resource._model
 
@@ -188,13 +188,13 @@ module JSONAPI
       def authorize_remove_to_many_relationship
         source_resource = @resource_klass.find_by_key(
           @resource_id,
-          context: operation_context
+          context: context
         )
         source_record = source_resource._model
 
         related_resource = @resource_klass._relationship(@operation.relationship_type).resource_klass.find_by_key(
           @operation.associated_key,
-          context: operation_context
+          context: context
         )
         related_record = related_resource._model unless related_resource.nil?
 
@@ -207,7 +207,7 @@ module JSONAPI
       def authorize_remove_to_one_relationship
         source_resource = @resource_klass.find_by_key(
           @resource_id,
-          context: operation_context
+          context: context
         )
 
         related_resource = source_resource.public_send(@operation.relationship_type)
@@ -220,17 +220,7 @@ module JSONAPI
       private
 
       def authorizer
-        @authorizer ||= ::JSONAPI::Authorization.configuration.authorizer.new(operation_context)
-      end
-
-      # TODO: Communicate with upstream to fix this nasty hack
-      def operation_context
-        case @operation_type
-        when :show_relationship
-          @operation.instance_variable_get('@options')[:context]
-        else
-          @operation.options[:context]
-        end
+        @authorizer ||= ::JSONAPI::Authorization.configuration.authorizer.new(context)
       end
 
       # TODO: Communicate with upstream to fix this nasty hack
@@ -262,7 +252,7 @@ module JSONAPI
             case assoc_value
             when Hash # polymorphic relationship
               resource_class = @resource_klass.resource_for(assoc_value[:type].to_s)
-              resource_class.find_by_key(assoc_value[:id], context: @operation.options[:context])._model
+              resource_class.find_by_key(assoc_value[:id], context: context)._model
             else
               resource_class = resource_class_for_relationship(assoc_name)
               primary_key = resource_class._primary_key
@@ -290,7 +280,7 @@ module JSONAPI
             next_resource_klass = relationship.resource_klass
             Array.wrap(
               source_record.public_send(
-                relationship.relation_name(@operation.options[:context])
+                relationship.relation_name(context)
               )
             ).each do |next_source_record|
               deep.each do |next_include_item|
@@ -307,7 +297,7 @@ module JSONAPI
           case relationship
           when JSONAPI::Relationship::ToOne
             related_record = source_record.public_send(
-              relationship.relation_name(@operation.options[:context])
+              relationship.relation_name(context)
             )
             return if related_record.nil?
             authorizer.include_has_one_resource(source_record, related_record)
