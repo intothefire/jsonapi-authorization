@@ -22,12 +22,12 @@ class Application < Rails::Application
 
   config.middleware.delete "Rack::Lock"
   config.middleware.delete "ActionDispatch::Flash"
-  config.middleware.delete "ActionDispatch::BestStandardsSupport"
+  # config.middleware.delete "ActionDispatch::BestStandardsSupport"
 
   config.secret_key_base = "correct-horse-battery-staple"
 end
 
 JSONAPI.configure do |config|
-  config.operations_processor = :jsonapi_authorization
+  config.default_processor_klass = :jsonapi_authorization
   config.exception_class_whitelist = [Pundit::NotAuthorizedError]
 end

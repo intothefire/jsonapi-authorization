@@ -2,28 +2,28 @@ require 'pundit'
 
 module JSONAPI
   module Authorization
-    class AuthorizingOperationsProcessor < ::ActiveRecordOperationsProcessor
-      set_callback :find_operation, :before, :authorize_find
-      set_callback :show_operation, :before, :authorize_show
-      set_callback :show_relationship_operation, :before, :authorize_show_relationship
-      set_callback :show_related_resource_operation, :before, :authorize_show_related_resource
-      set_callback :show_related_resources_operation, :before, :authorize_show_related_resources
-      set_callback :create_resource_operation, :before, :authorize_create_resource
-      set_callback :remove_resource_operation, :before, :authorize_remove_resource
-      set_callback :replace_fields_operation, :before, :authorize_replace_fields
-      set_callback :replace_to_one_relationship_operation, :before, :authorize_replace_to_one_relationship
-      set_callback :create_to_many_relationship_operation, :before, :authorize_create_to_many_relationship
-      set_callback :replace_to_many_relationship_operation, :before, :authorize_replace_to_many_relationship
-      set_callback :remove_to_many_relationship_operation, :before, :authorize_remove_to_many_relationship
-      set_callback :remove_to_one_relationship_operation, :before, :authorize_remove_to_one_relationship
+    class AuthorizingOperationsProcessor < ::JSONAPI::Processor
+      set_callback :find, :before, :authorize_find
+      set_callback :show, :before, :authorize_show
+      set_callback :show_relationship, :before, :authorize_show_relationship
+      set_callback :show_related_resource, :before, :authorize_show_related_resource
+      set_callback :show_related_resources, :before, :authorize_show_related_resources
+      set_callback :create_resource, :before, :authorize_create_resource
+      set_callback :remove_resource, :before, :authorize_remove_resource
+      set_callback :replace_fields, :before, :authorize_replace_fields
+      set_callback :replace_to_one_relationship, :before, :authorize_replace_to_one_relationship
+      set_callback :create_to_many_relationship, :before, :authorize_create_to_many_relationship
+      set_callback :replace_to_many_relationship, :before, :authorize_replace_to_many_relationship
+      set_callback :remove_to_many_relationship, :before, :authorize_remove_to_many_relationship
+      set_callback :remove_to_one_relationship, :before, :authorize_remove_to_one_relationship
 
       [
-        :find_operation,
-        :show_operation,
-        :show_related_resource_operation,
-        :show_related_resources_operation,
-        :create_resource_operation,
-        :replace_fields_operation
+        :find,
+        :show,
+        :show_related_resource,
+        :show_related_resources,
+        :create_resource,
+        :replace_fields
       ].each do |op_name|
         set_callback op_name, :after, :authorize_include_directive
       end
